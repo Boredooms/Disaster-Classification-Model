@@ -1,177 +1,256 @@
 # AI Disaster Classification Model
 
-This project implements a deep learning model to classify images of natural disasters into four categories: Cyclone, Earthquake, Flood, and Wildfire. It leverages transfer learning by fine-tuning a pre-trained ResNet50 model.
+## Overview
+
+This project provides a web-based solution for classifying images of natural disasters. It utilizes a deep learning model built with TensorFlow and Keras to categorize images into four distinct classes: **Cyclone**, **Earthquake**, **Flood**, and **Wildfire**. The core of the project is a fine-tuned **ResNet50** model, which leverages transfer learning for high accuracy. The model is served through a Flask web application that allows users to upload an image and receive a prediction.
+
+## Features
+
+-   **Deep Learning Model**: A powerful Convolutional Neural Network (CNN) based on the ResNet50 architecture, fine-tuned for disaster classification.
+-   **Transfer Learning**: Utilizes a model pre-trained on the ImageNet dataset to achieve high performance with a smaller, specialized dataset.
+-   **Web Interface**: A user-friendly web application built with Flask for easy interaction and real-time predictions.
+-   **Data Augmentation**: Artificially expands the training dataset by applying random transformations to images, improving the model's robustness and generalization.
+-   **Git LFS**: Manages large files like the trained model (`.h5`) and image datasets, keeping the core repository lightweight.
+-   **Structured Workflow**: Includes scripts for every stage of the machine learning lifecycle: data preparation, model training, evaluation, and prediction.
+
+## Getting Started
+
+### Prerequisites
+
+-   Python 3.7+
+-   pip
+-   Git and Git LFS
+
+### Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd Ai-Disaster-Classification-Model
+    ```
+
+2.  **Set up Git LFS:**
+    ```bash
+    git lfs install
+    git lfs pull
+    ```
+
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+## Usage
+
+The project is divided into several scripts to handle different parts of the workflow.
+
+### 1. Data Preparation
+
+Run the `prepare_dataset.py` script to clean and structure the raw image data.
+
+```bash
+python prepare_dataset.py
+```
+This will create a `dataset_structured` directory with `train`, `validation`, and `test` sets.
+
+### 2. Model Training
+
+Run the `train.py` script to train the model.
+
+```bash
+python train.py
+```
+The trained model will be saved as `saved_model/disaster_model.h5`.
+
+### 3. Model Evaluation
+
+Run the `evaluate.py` script to evaluate the model's performance on the test set.
+
+```bash
+python evaluate.py
+```
+This will print a classification report and save a confusion matrix image to `images/confusion_matrix.png`.
+
+### 4. Prediction
+
+You can make predictions using the web application or the command-line script.
+
+#### Web Application
+
+1.  **Run the Flask server:**
+    ```bash
+    python app.py
+    ```
+2.  **Access the application:**
+    Open your web browser and navigate to `http://127.0.0.1:5000`.
+
+#### Command-Line
+
+Run the `predict.py` script with the path to an image.
+
+```bash
+python predict.py --image /path/to/your/image.jpg
+```
 
 ## Project Structure
 
 ```
 Ai-Disaster-Classification-Model/
-├── Cyclone_Wildfire_Flood_Earthquake_Dataset/  # Raw image data
-├── app.py                                      # Interactive prediction script
-├── dataset_structured/                         # Organized train/val/test data
-├── evaluate.py                                 # Model evaluation script
-├── model.py                                    # Model architecture definition
-├── predict.py                                  # Command-line prediction script
-├── prepare_dataset.py                          # Data cleaning and splitting script
-├── readme.md                                   # This file
-├── requirements.txt                            # Project dependencies
+├── .git/
+├── .gitattributes
+├── .gitignore
+├── Cyclone_Wildfire_Flood_Earthquake_Dataset/  # Raw, unsorted image data.
+├── dataset_structured/                         # Cleaned and organized train/val/test data.
+├── images/
+│   └── confusion_matrix.png                    # Saved confusion matrix plot.
 ├── saved_model/
-│   └── disaster_model.h5                       # The trained model file
-└── test/                                       # (Optional) test images
+│   └── disaster_model.h5                       # The trained and saved Keras model file.
+├── static/
+│   └── styles.css                              # CSS for the web interface.
+├── templates/
+│   └── index.html                              # HTML template for the web application.
+├── app.py                                      # Flask backend for the web application.
+├── evaluate.py                                 # Script to evaluate the model's performance.
+├── model.py                                    # Defines the ResNet50 model architecture.
+├── predict.py                                  # Command-line script for making predictions.
+├── prepare_dataset.py                          # Script to clean and structure the dataset.
+├── readme.md                                   # This file.
+└── requirements.txt                            # Project dependencies.
 ```
 
-## Files
+## Files Description
 
-### `prepare_dataset.py`
+*   **Cyclone_Wildfire_Flood_Earthquake_Dataset/**: This directory contains the raw, unsorted image data for the four disaster categories.
+*   **dataset_structured/**: This directory is created by the `prepare_dataset.py` script and contains the cleaned and organized train, validation, and test data.
+*   **images/**: This directory contains the confusion matrix plot generated by the `evaluate.py` script.
+*   **saved_model/**: This directory contains the trained and saved Keras model file (`disaster_model.h5`).
+*   **static/**: This directory contains the CSS file for the web interface.
+*   **templates/**: This directory contains the HTML template for the web application.
+*   **app.py**: This is the Flask backend for the web application. It handles the routing, model loading, image handling, and prediction.
+*   **evaluate.py**: This script evaluates the model's performance on the test set. It prints a classification report and saves a confusion matrix image to the `images/` directory.
+*   **model.py**: This script defines the ResNet50 model architecture.
+*   **predict.py**: This is a command-line script for making predictions on a single image.
+*   **prepare_dataset.py**: This script cleans and structures the raw image data into training, validation, and testing sets.
+-   **readme.md**: This file.
+*   **requirements.txt**: This file lists the project dependencies.
 
-**Purpose**: To take the raw, mixed dataset of images and structure it into organized directories for training, validation, and testing. This script also cleans the dataset by removing any corrupted or non-image files.
+## Web Application
 
-**Detailed Algorithm**:
+The project includes a simple web application to interact with the classification model.
 
-1.  **Dataset Cleaning (`clean_dataset`)**:
-    *   **Objective**: Ensure every file in the dataset is a valid, readable image to prevent errors during training.
-    *   **Process**:
-        *   It recursively walks through every file in the provided `dataset_path`.
-        *   For each file, it uses the `PIL.Image.open()` function within a `try...except` block.
-        *   If `PIL.Image.open()` succeeds, the file is a valid image, and it is closed immediately.
-        *   If it fails and raises an exception (like `PIL.UnidentifiedImageError` or a generic `IOError`), the file is considered corrupt or not an image.
-        *   The script then prints the path of the corrupt file and deletes it using `os.remove()`.
+### Frontend (`templates/index.html`)
 
-2.  **Dataset Splitting (`split_dataset`)**:
-    *   **Objective**: To partition the cleaned dataset into three standard subsets:
-        *   **Training set**: Used to train the model.
-        *   **Validation set**: Used to monitor the model's performance on unseen data during training to tune hyperparameters and prevent overfitting.
-        *   **Test set**: Used for the final, unbiased evaluation of the trained model's performance.
-    *   **Process**:
-        *   It first deletes the `base_dest_dir` (the `dataset_structured` folder) if it already exists, ensuring a fresh split every time.
-        *   It iterates through each class directory (e.g., "Cyclone") in the `source_dir`.
-        *   For each class, it creates corresponding subdirectories in the `train`, `validation`, and `test` folders.
-        *   It lists all images for that class and shuffles them randomly using `random.shuffle()` to ensure the splits are not biased by the file order.
-        *   It calculates the number of images for each split based on the provided ratios (`train_ratio`, `val_ratio`, `test_ratio`).
-        *   It uses list slicing to partition the shuffled list of images.
-        *   Finally, it iterates through these partitioned lists and copies each file from the source to its new destination (e.g., `dataset_structured/train/Cyclone/`) using `shutil.copy2()`.
+-   **Framework**: Standard HTML5 with CSS for styling.
+-   **Functionality**:
+    -   Provides a clean and simple user interface.
+    -   Features a file upload form where users can select an image (`.jpg`, `.jpeg`, `.png`).
+    -   Displays the uploaded image and the model's prediction result.
+
+### Backend (`app.py`)
+
+-   **Framework**: **Flask**.
+-   **Functionality**:
+    -   **Routing**: Defines the endpoints for the web application.
+    -   **Model Loading**: Loads the pre-trained `disaster_model.h5`.
+    -   **Image Handling**: Receives and preprocesses the uploaded image.
+    -   **Prediction**: Passes the image to the model to get a prediction.
+    -   **Renders Results**: Renders the `index.html` template with the prediction result.
+
+## Python Scripts Explained
 
 ### `model.py`
 
-**Purpose**: To define the architecture of the Convolutional Neural Network (CNN). This script uses the powerful technique of **transfer learning**.
+**Purpose**: To define the architecture of the Convolutional Neural Network (CNN) using transfer learning.
 
-**Detailed Algorithm (Transfer Learning and Fine-Tuning)**:
+-   **Process**:
+    1.  **Loads ResNet50**: It loads the `ResNet50` model pre-trained on ImageNet, excluding the final classification layer (`include_top=False`).
+    2.  **Fine-Tuning**: It freezes the layers of the base model to retain the learned features from ImageNet.
+    3.  **Custom Head**: A new classification head is added on top of the ResNet50 base. This head consists of:
+        -   `GlobalAveragePooling2D`: To reduce the spatial dimensions.
+        -   `Dense` layer with `relu` activation.
+        -   A final `Dense` layer with a `softmax` activation function to output the probabilities for each disaster class.
+    4.  **Compilation**: The model is compiled with the `Adam` optimizer, `categorical_crossentropy` loss function, and `accuracy` as the evaluation metric.
 
-1.  **Load Pre-trained Base Model**:
-    *   **Model**: `ResNet50` (Residual Network with 50 layers).
-    *   **Rationale**: Instead of training a very deep network from scratch, which requires a massive amount of data and computational power, we use a model that has already been trained on the ImageNet dataset. This pre-training has taught the model to recognize a vast library of low-level and mid-level features (edges, textures, patterns, simple shapes).
-    *   **`include_top=False`**: This is a critical parameter. It means we are only loading the convolutional base of ResNet50 (the feature extraction part) and excluding its final fully connected layers (the original classification part for 1000 ImageNet classes).
-    *   **`weights='imagenet'`**: This specifies that we want to load the weights learned from the ImageNet training.
+### `prepare_dataset.py`
 
-2.  **Fine-Tuning Strategy**:
-    *   **Concept**: We want to retain the general feature knowledge from the early layers of ResNet50 but adapt the more specialized, high-level features from the later layers to our specific disaster images.
-    *   **Freezing Layers**: The first 143 layers of the ResNet50 model are "frozen" by setting `layer.trainable = False`. Their weights, learned from ImageNet, will not be changed during our training. This preserves the robust, general feature extractors.
-    *   **Unfreezing (Thawing) Layers**: The layers from 143 onwards are left as `trainable`. Their weights will be slightly adjusted during our training process, allowing them to specialize in recognizing features relevant to cyclones, earthquakes, etc.
+**Purpose**: To clean the raw image data and structure it into training, validation, and testing sets.
 
-3.  **Building a Custom Classification Head**:
-    *   **Objective**: To add new layers on top of the ResNet50 base that can take the extracted features and perform our specific 4-class classification.
-    *   **`GlobalAveragePooling2D`**:
-        *   This layer takes the final feature maps from the ResNet50 base (which are multi-dimensional tensors) and converts each feature map into a single number by taking its average.
-        *   **Advantage**: It drastically reduces the number of parameters compared to a traditional `Flatten` layer, making the model less prone to overfitting.
-    *   **`Dense(1024, activation='relu')`**: A standard fully connected layer with 1024 neurons. It acts as a classifier, learning complex combinations of the features provided by the pooling layer. The `relu` activation introduces non-linearity.
-    *   **`Dropout(0.3)`**: A regularization technique. During each training step, it randomly deactivates 30% of the neurons in the previous layer. This prevents the model from becoming too reliant on any single neuron or feature, forcing it to learn more robust and generalizable patterns.
-    *   **`Dense(512, activation='relu')`**: Another dense layer to further refine the classification logic.
-    *   **`Dense(num_classes, activation='softmax')`**: The final output layer.
-        *   It has a number of neurons equal to the number of classes (4 in our case).
-        *   The **`softmax`** activation function is essential for multi-class classification. It takes the raw output scores (logits) and squashes them into a probability distribution that sums to 1. Each neuron's output is the model's predicted probability that the image belongs to that class.
-
-4.  **Model Compilation**:
-    *   **Objective**: To configure the model for training by specifying the optimizer, loss function, and metrics.
-    *   **`optimizer=Adam(learning_rate=1e-5)`**:
-        *   The `Adam` optimizer is an efficient and popular choice.
-        *   A **very low learning rate** (`0.00001`) is crucial for fine-tuning. A high learning rate would risk making large updates to the weights of the unfrozen layers, potentially destroying the valuable pre-trained features.
-    *   **`loss='categorical_crossentropy'`**: This is the standard loss function for multi-class classification. It measures how different the predicted probability distribution is from the true label. The model's goal is to minimize this loss.
-    *   **`metrics=['accuracy']`**: We monitor the `accuracy` metric during training to see how the model is performing.
+-   **Process**:
+    1.  **`clean_dataset`**: Iterates through all files and removes corrupt images.
+    2.  **`split_dataset`**: Partitions the cleaned images into `train`, `validation`, and `test` sets and copies them into the `dataset_structured` directory.
 
 ### `train.py`
 
-**Purpose**: To execute the training process. It feeds the prepared data into the model and saves the resulting trained model.
+**Purpose**: To train the model on the prepared dataset.
 
-**Detailed Algorithm**:
-
-1.  **Data Augmentation (`ImageDataGenerator`)**:
-    *   **Objective**: To artificially expand the training dataset and make the model more robust to variations in real-world images.
-    *   **Process**: It defines a set of random transformations that will be applied to the training images on-the-fly.
-        *   `rotation_range=30`: Randomly rotate images.
-        *   `width_shift_range=0.2`, `height_shift_range=0.2`: Randomly shift images horizontally or vertically.
-        *   `shear_range=0.2`: Randomly apply a shearing transformation.
-        *   `zoom_range=0.2`: Randomly zoom in on images.
-        *   `horizontal_flip=True`: Randomly flip images horizontally.
-        *   `brightness_range=[0.8, 1.2]`: Randomly adjust image brightness.
-    *   The validation data generator (`val_datagen`) only performs pixel scaling, as we want to evaluate the model on the original, untransformed validation images.
-
-2.  **Data Generators (`flow_from_directory`)**:
-    *   **Concept**: Instead of loading all images into memory at once (which would be impossible for large datasets), these generators load images in batches from their directories.
-    *   **Process**: They automatically read images from the `train` and `validation` folders, resize them to `(224, 224)`, apply the defined augmentations (for training data), convert them to batches of tensors, and feed them to the model.
-
-3.  **Class Weighting (`compute_class_weight`)**:
-    *   **Objective**: To address class imbalance. If one class has significantly more images than another, the model might become biased.
-    *   **Process**: It calculates weights that are inversely proportional to the class frequencies. Under-represented classes get a higher weight, which means the model will incur a larger penalty for misclassifying them, forcing it to pay more attention to those classes.
-
-4.  **Model Training (`model.fit`)**:
-    *   **Process**: This is the core training loop.
-        *   It runs for a specified number of `epochs` (one epoch is one full pass over the entire training dataset).
-        *   In each step of an epoch, the model receives a batch of images from the `train_generator`.
-        *   It performs a **forward pass** (makes a prediction), calculates the **loss** (how wrong the prediction was), and then performs **backpropagation** to calculate how much each weight contributed to the error.
-        *   The `Adam` optimizer then updates the model's trainable weights to reduce the loss.
-        *   After each epoch, it evaluates the model on the `val_generator` to track its performance on unseen data.
-
-5.  **Saving**:
-    *   Once training is complete, `model.save()` serializes the model's architecture, weights, and optimizer state into a single HDF5 file (`.h5`).
+-   **Process**:
+    1.  **Data Augmentation**: It uses `ImageDataGenerator` to apply random transformations (rotation, zoom, flips, etc.) to the training images to prevent overfitting.
+    2.  **Data Loading**: It creates data generators to load images in batches from the `train` and `validation` directories.
+    3.  **Training Loop**: It calls `model.fit()` to train the model, monitoring performance on the validation set.
+    4.  **Save Model**: After training, the final model is saved to `saved_model/disaster_model.h5`.
 
 ### `evaluate.py`
 
-**Purpose**: To provide a quantitative and unbiased assessment of the final trained model's performance on the test set.
+**Purpose**: To evaluate the performance of the trained model on the unseen test set.
 
-**Detailed Algorithm**:
+-   **Process**:
+    1.  **Load Model**: Loads the saved `disaster_model.h5`.
+    2.  **Load Test Data**: Creates a data generator for the test set.
+    3.  **Predict**: The model predicts the classes for all images in the test set.
+    4.  **Generate Reports**:
+        -   **Classification Report**: Generates a report with precision, recall, and F1-score for each class.
+        -   **Confusion Matrix**: Creates and saves a confusion matrix plot.
 
-1.  **Load Model and Test Data**:
-    *   It loads the saved `disaster_model.h5`.
-    *   It creates a generator for the test set using `ImageDataGenerator` (only rescaling) and `flow_from_directory`. `shuffle=False` is important here to ensure the predictions align with the true labels.
+### `predict.py`
 
-2.  **Generate Predictions**:
-    *   `model.predict()` is called on the test generator to get the model's output (probability distributions) for every image in the test set.
-    *   `np.argmax(..., axis=1)` is used to find the index of the highest probability for each prediction, which corresponds to the predicted class label.
+**Purpose**: To provide a command-line interface for making a prediction on a single image.
 
-3.  **Calculate and Display Metrics**:
-    *   **Classification Report**: This report from `scikit-learn` provides a breakdown of performance for each class using:
-        *   **Precision**: Of all the images the model *predicted* as "Flood", what percentage were actually "Flood"? (`TP / (TP + FP)`)
-        *   **Recall (Sensitivity)**: Of all the actual "Flood" images in the dataset, what percentage did the model correctly identify? (`TP / (TP + FN)`)
-        *   **F1-Score**: The harmonic mean of precision and recall, providing a balanced measure.
-    *   **Confusion Matrix**: This is a table that visualizes performance.
-        *   The rows represent the true classes.
-        *   The columns represent the predicted classes.
-        *   The diagonal elements show the number of correct predictions for each class.
-        *   Off-diagonal elements show where the model is making mistakes (e.g., the number of times it predicted "Cyclone" when the image was actually "Wildfire").
+-   **Process**:
+    1.  **Argument Parsing**: Takes the image path as a command-line argument.
+    2.  **Load Model**: Loads the saved `disaster_model.h5`.
+    3.  **Preprocess Image**: Loads, resizes, and preprocesses the input image.
+    4.  **Inference**: The preprocessed image is fed to the model for prediction.
+    5.  **Output Result**: The script prints the predicted class and the confidence score.
 
-### `app.py` and `predict.py`
+## Detailed Workflow
 
-**Purpose**: To use the trained model for inference on new, single images.
+The end-to-end workflow of the project is as follows:
 
-**Detailed Algorithm**:
+1.  **Data Collection and Preparation**:
+    -   The process begins with a raw dataset of disaster images located in the `Cyclone_Wildfire_Flood_Earthquake_Dataset` directory.
+    -   The `prepare_dataset.py` script is executed to first clean this dataset by identifying and removing any corrupt or invalid image files.
+    -   After cleaning, the script splits the dataset into three subsets: training (70%), validation (15%), and testing (15%).
+    -   These subsets are then organized into a new directory, `dataset_structured`, which has a clear structure with `train`, `validation`, and `test` folders, each containing subfolders for the respective disaster categories.
 
-1.  **Load Model**: The saved `disaster_model.h5` is loaded.
-2.  **Image Preprocessing**:
-    *   **Objective**: Any new image must be transformed to exactly match the format of the images the model was trained on.
-    *   **Process**:
-        *   The image is loaded from its file path using `PIL.Image.open()`.
-        *   It's resized to `(224, 224)` pixels.
-        *   It's converted to a NumPy array of shape `(224, 224, 3)`.
-        *   The pixel values are scaled from the `[0, 255]` integer range to the `[0, 1]` float range by dividing by 255.0.
-        *   The array's dimensions are expanded using `np.expand_dims(..., axis=0)` to create a shape of `(1, 224, 224, 3)`. This is because the model is designed to work on batches of images, so we treat our single image as a batch of size 1.
-3.  **Inference**:
-    *   The preprocessed image array is passed to `model.predict()`.
-    *   The model returns a 2D array containing the probability distribution for our single image (e.g., `[[0.1, 0.05, 0.8, 0.05]]`).
-4.  **Output**:
-    *   `np.argmax()` finds the index of the maximum value in the result (in the example above, index 2).
-    *   This index is used to look up the corresponding class name from the list of classes.
-    *   The predicted class and the confidence score (the probability value) are printed.
+2.  **Model Architecture and Definition**:
+    -   The neural network architecture is defined in `model.py`.
+    -   It leverages the **ResNet50** model, pre-trained on the massive ImageNet dataset, as a feature extractor. This is a core principle of **transfer learning**.
+    -   The top classification layer of ResNet50 is removed, and a new custom head is added. This head is composed of a `GlobalAveragePooling2D` layer to reduce parameters, followed by a `Dense` layer with `relu` activation, and finally, a `Dense` output layer with `softmax` activation to produce the final class probabilities.
+    -   The model is then compiled with the `Adam` optimizer, `categorical_crossentropy` as the loss function, and is set to monitor `accuracy`.
 
-### `requirements.txt`
+3.  **Model Training**:
+    -   The `train.py` script orchestrates the training process.
+    -   It uses `ImageDataGenerator` from Keras to perform **data augmentation** on the training set. This involves applying random transformations like rotations, zooms, and flips to the images in real-time, which helps the model generalize better and reduces overfitting.
+    -   The script creates data generators that feed the training and validation data to the model in batches.
+    -   The `model.fit()` method is called to begin training. The model learns from the training data, and its performance is checked against the validation data at the end of each epoch.
+    -   Once training is complete, the final trained model, including its architecture and learned weights, is saved to `saved_model/disaster_model.h5`.
 
-This file lists all the Python libraries (e.g., `tensorflow`, `numpy`, `scikit-learn`) required for the project. It allows for easy setup of the environment using the command `pip install -r requirements.txt`.
+4.  **Model Evaluation**:
+    -   To assess the model's performance on unseen data, the `evaluate.py` script is used.
+    -   It loads the saved model and uses the `test` set, which the model has never been exposed to during training.
+    -   The script generates two key evaluation metrics:
+        -   A **Classification Report**, which provides detailed metrics like precision, recall, and F1-score for each disaster class.
+        -   A **Confusion Matrix**, which is saved as an image and visually represents the model's performance, showing where it gets predictions right and where it makes mistakes.
+
+5.  **Inference and Deployment**:
+    -   Once the model is trained and evaluated, it is ready for making predictions. This can be done in two ways:
+    -   **Web Application**: By running `app.py`, a Flask web server is started. Users can navigate to the provided URL in their browser, upload an image of a disaster, and the web application will display the model's prediction.
+    -   **Command-Line Interface**: For quick, single-image predictions, the `predict.py` script can be used. It takes the path to an image as an argument and prints the predicted disaster class and the model's confidence score directly in the terminal.
+
+## Conclusion
+
+This project successfully demonstrates the development of a complete deep learning solution for a real-world problem. By leveraging transfer learning with the ResNet50 architecture, it achieves effective classification of natural disasters from images. The inclusion of a user-friendly web interface built with Flask makes the model accessible to non-technical users, while the command-line tools provide a straightforward way for developers to interact with the model.
+
+**Potential applications** for this technology are vast, including aiding first responders in quickly assessing situations from satellite or drone imagery, helping news agencies to categorize and report on events, and contributing to automated environmental monitoring systems.
+
+**Future improvements** could involve expanding the dataset to include more disaster categories, experimenting with other state-of-the-art model architectures like EfficientNet or Vision Transformers, and deploying the application to a cloud platform for global accessibility and scalability.

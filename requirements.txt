@@ -1,7 +1,8 @@
-tensorflow
-numpy
-opencv-python
-matplotlib
-scikit-learn
-Flask
-Pillow
+tensorflow==2.12.0
+numpy==1.24.3
+opencv-python==4.7.0.72
+matplotlib==3.7.1
+scikit-learn==1.2.2
+Flask==2.2.2
+Pillow==9.5.0
+seaborn==0.12.2
